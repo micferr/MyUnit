@@ -65,6 +65,12 @@ public class TestRunner {
         try {
             method.setAccessible(true);
             method.invoke(test);
+            if (expectsExceptions(method)) {
+                throw new AssertionError(method.getName() +
+                        " returned without throwing an exception, but expected one of type " +
+                        method.getDeclaredAnnotation(Test.class).expected().getName()
+                );
+            }
         } catch (InvocationTargetException exception) {
             if (isExpectedException(exception, method)) {
                 return;
@@ -73,6 +79,10 @@ public class TestRunner {
         } catch (IllegalAccessException exception) {
             out.log("Should never happen.");
         }
+    }
+
+    private static boolean expectsExceptions(Method method) {
+        return method.getDeclaredAnnotation(Test.class).expected() != Test.None.class;
     }
 
     private static boolean isExpectedException(Exception exception, Method method) {
