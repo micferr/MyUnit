@@ -55,15 +55,28 @@ public class TestRunner {
         out.log("Testing " + testClass.getSimpleName() + "...");
         for (Method method : testClass.getDeclaredMethods()) {
             if (method.isAnnotationPresent(Test.class)) {
-                out.log("Executing test method: " + method.getName());
-                try {
-                    method.setAccessible(true);
-                    method.invoke(test);
-                } catch (InvocationTargetException exception) {
-                    logSkipTestCase(testClass, exception.getCause());
-                }
+                testMethod(test, method);
             }
         }
+    }
+
+    private static void testMethod(Object test, Method method) {
+        out.log("Executing test method: " + method.getName());
+        try {
+            method.setAccessible(true);
+            method.invoke(test);
+        } catch (InvocationTargetException exception) {
+            if (isExpectedException(exception, method)) {
+                return;
+            }
+            logSkipTestCase(test.getClass(), exception.getCause());
+        } catch (IllegalAccessException exception) {
+            out.log("Should never happen.");
+        }
+    }
+
+    private static boolean isExpectedException(Exception exception, Method method) {
+        return exception.getCause().getClass().equals(method.getDeclaredAnnotation(Test.class).expected());
     }
 
     private static void tearDown(Object test) throws Throwable {
