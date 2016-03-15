@@ -45,62 +45,41 @@ public class TestRunner {
     }
 
     private static void setUp(Object test) throws Throwable {
-        executePhase(test, TestPhase.SETUP);
+        Class testClass = test.getClass();
+        out.log("Setting up " + testClass.getSimpleName() + "...");
+        executeAnnotatedMethods(test, Before.class);
     }
 
     private static void executeTests(Object test) throws Throwable {
-        executePhase(test, TestPhase.EXECUTION);
-    }
-
-    private static void tearDown(Object test) throws Throwable {
-        executePhase(test, TestPhase.TEARDOWN);
-    }
-
-    private static void executePhase(Object test, TestPhase testPhase) throws Throwable {
-        Class<? extends Annotation> annotationClass;
-        String actioningDescription;
-        String actionDescription;
-        switch (testPhase) {
-            case SETUP:
-                annotationClass = Before.class;
-                actionDescription = "setup";
-                actioningDescription = "Setting up";
-                break;
-            case EXECUTION:
-                annotationClass = Test.class;
-                actionDescription = "test";
-                actioningDescription = "Testing";
-                break;
-            case TEARDOWN:
-                annotationClass = After.class;
-                actionDescription = "tear down";
-                actioningDescription = "Tearing down";
-                break;
-            default: throw new IllegalArgumentException("Invalid test phase");
-        }
         Class testClass = test.getClass();
-        out.log(actioningDescription + " " + testClass.getSimpleName() + "...");
+        out.log("Testing " + testClass.getSimpleName() + "...");
         for (Method method : testClass.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(annotationClass)) {
-                out.log("Executing " + actionDescription +" method: " + method.getName());
+            if (method.isAnnotationPresent(Test.class)) {
+                out.log("Executing test method: " + method.getName());
                 try {
                     method.setAccessible(true);
                     method.invoke(test);
                 } catch (InvocationTargetException exception) {
-                    if (testPhase == TestPhase.EXECUTION) {
-                        logSkipTestCase(testClass, exception.getTargetException());
-                    } else {
-                        throw exception.getCause();
-                    }
+                    logSkipTestCase(testClass, exception.getCause());
                 }
             }
         }
     }
 
-    private enum TestPhase {
-        SETUP,
-        EXECUTION,
-        TEARDOWN
+    private static void tearDown(Object test) throws Throwable {
+        Class testClass = test.getClass();
+        out.log("Tearing down " + testClass.getSimpleName() + "...");
+        executeAnnotatedMethods(test, After.class);
+    }
+
+    private static void executeAnnotatedMethods(Object test, Class<? extends Annotation> annotationClass) throws Throwable {
+        for (Method method : test.getClass().getDeclaredMethods()) {
+            if (method.isAnnotationPresent(annotationClass)) {
+                out.log("Executing tear down method: " + method.getName());
+                method.setAccessible(true);
+                method.invoke(test);
+            }
+        }
     }
 
     private static void logSkipWholeTest(Class t, Throwable e) {
