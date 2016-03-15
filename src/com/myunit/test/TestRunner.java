@@ -6,6 +6,8 @@ import com.myunit.log.LoggerBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestRunner {
     private static Logger out;
@@ -36,6 +38,7 @@ public class TestRunner {
             } catch (Throwable exception) {
                 logSkipWholeTest(testClass, exception);
             }
+            out.log("");
         }
     }
 
@@ -53,11 +56,36 @@ public class TestRunner {
     private static void executeTests(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Testing " + testClass.getSimpleName() + "...");
-        for (Method method : testClass.getDeclaredMethods()) {
+        for (Method method : getSortedTests(testClass)) {
             if (method.isAnnotationPresent(Test.class)) {
                 testMethod(test, method);
             }
         }
+    }
+
+    private static List<Method> getSortedTests(Class testClass) {
+        Method[] methods = testClass.getDeclaredMethods();
+        List<Method> tests = new ArrayList<>();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Test.class)) {
+                tests.add(method);
+            }
+        }
+        tests.sort((o1, o2) -> {
+            boolean o1isSorted = o1.isAnnotationPresent(Sorted.class);
+            boolean o2isSorted = o2.isAnnotationPresent(Sorted.class);
+            if (!o1isSorted && !o2isSorted) {
+                return 0;
+            } else if (o1isSorted && !o2isSorted){
+                return -1;
+            } else if (!o1isSorted) {
+                return 1;
+            } else {
+                return o1.getDeclaredAnnotation(Sorted.class).value() -
+                        o2.getDeclaredAnnotation(Sorted.class).value();
+            }
+        });
+        return tests;
     }
 
     private static void testMethod(Object test, Method method) {
