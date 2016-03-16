@@ -12,13 +12,17 @@ import java.util.List;
 
 public class TestRunner {
     private Logger out;
+    private int failedTests;
+    private int executedTests;
 
     public TestRunner() {
-        out = new LoggerBuilder().setLogger(System.out).build();
+        this(System.out);
     }
 
     public TestRunner(Object o) {
         out = new LoggerBuilder().setLogger(o).build();
+        failedTests = 0;
+        executedTests = 0;
     }
 
     public Logger getLogger() {
@@ -30,6 +34,8 @@ public class TestRunner {
     }
 
     public void run(Class... testClasses) {
+        failedTests = 0;
+        executedTests = 0;
         for (Class testClass : testClasses) {
             try {
                 Object test = buildTest(testClass);
@@ -41,6 +47,7 @@ public class TestRunner {
             }
             out.log("");
         }
+        logRunResults();
     }
 
     private Object buildTest(Class<?> testClass) throws Throwable {
@@ -91,10 +98,12 @@ public class TestRunner {
 
     private void testMethod(Object test, Method method) {
         out.log("Executing test method: " + method.getName());
+        executedTests++;
         try {
             method.setAccessible(true);
             method.invoke(test);
             if (expectsExceptions(method)) {
+                failedTests++;
                 throw new TestFailedError(method.getName() +
                         " returned without throwing an exception, but expected one of type " +
                         method.getDeclaredAnnotation(Test.class).expected().getName()
@@ -105,8 +114,10 @@ public class TestRunner {
                 return;
             }
             logSkipTestCase(test.getClass(), exception.getCause());
+            failedTests++;
         } catch (IllegalAccessException exception) {
             out.log("Should never happen.");
+            failedTests++;
         }
     }
 
@@ -127,7 +138,7 @@ public class TestRunner {
     private void executeAnnotatedMethods(Object test, Class<? extends Annotation> annotationClass) throws Throwable {
         for (Method method : test.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(annotationClass)) {
-                out.log("Executing tear down method: " + method.getName());
+                out.log("Executing method: " + method.getName());
                 method.setAccessible(true);
                 method.invoke(test);
             }
@@ -155,5 +166,10 @@ public class TestRunner {
         message += "Exception type: " + e.getClass().getSimpleName() + "\n";
         message += "Exception message: " + e.getMessage();
         return message;
+    }
+
+    private void logRunResults() {
+        out.log("Executed tests: " + executedTests);
+        out.log("Failed tests: " + failedTests);
     }
 }

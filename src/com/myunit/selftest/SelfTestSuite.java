@@ -11,6 +11,11 @@ public class SelfTestSuite {
         fail();
     }
 
+    @Test(expected = ArithmeticException.class)
+    void test_RuntimeException() {
+        int x = 5/0;
+    }
+
     public static void main(String[] args){
         new TestRunner().run(
                 SelfTestSuite.class,
