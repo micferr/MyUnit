@@ -1,5 +1,6 @@
 package com.myunit.selftest;
 
+import com.myunit.assertion.TestFailedError;
 import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.*;
@@ -10,7 +11,7 @@ public class AssertTrueFalse {
         assertTrue(true);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = TestFailedError.class)
     void testAssertTrue_actuallyFalse() {
         assertTrue(false);
     }
@@ -20,7 +21,7 @@ public class AssertTrueFalse {
         assertFalse(false);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = TestFailedError.class)
     void testAssertFalse_actuallyTrue() {
         assertFalse(true);
     }

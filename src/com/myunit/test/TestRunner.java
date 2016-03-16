@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestRunner {
-    private static Logger out;
+    private Logger out;
 
     public TestRunner() {
         out = new LoggerBuilder().setLogger(System.out).build();
@@ -21,11 +21,11 @@ public class TestRunner {
         out = new LoggerBuilder().setLogger(o).build();
     }
 
-    public static Logger getLogger() {
+    public Logger getLogger() {
         return out;
     }
 
-    public static void setLogger(Logger stream) {
+    public void setLogger(Logger stream) {
         out = stream;
     }
 
@@ -43,28 +43,28 @@ public class TestRunner {
         }
     }
 
-    private static Object buildTest(Class<?> testClass) throws Throwable {
+    private Object buildTest(Class<?> testClass) throws Throwable {
         out.log("Building " + testClass.getSimpleName() + "...");
         return testClass.getConstructor().newInstance();
     }
 
-    private static void setUp(Object test) throws Throwable {
+    private void setUp(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Setting up " + testClass.getSimpleName() + "...");
         executeAnnotatedMethods(test, Before.class);
     }
 
-    private static void executeTests(Object test) throws Throwable {
+    private void executeTests(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Testing " + testClass.getSimpleName() + "...");
-        for (Method method : getSortedTests(testClass)) {
+        getSortedTests(testClass).forEach((method) -> {
             if (method.isAnnotationPresent(Test.class)) {
                 testMethod(test, method);
             }
-        }
+        });
     }
 
-    private static List<Method> getSortedTests(Class testClass) {
+    private List<Method> getSortedTests(Class testClass) {
         Method[] methods = testClass.getDeclaredMethods();
         List<Method> tests = new ArrayList<>();
         for (Method method : methods) {
@@ -89,7 +89,7 @@ public class TestRunner {
         return tests;
     }
 
-    private static void testMethod(Object test, Method method) {
+    private void testMethod(Object test, Method method) {
         out.log("Executing test method: " + method.getName());
         try {
             method.setAccessible(true);
@@ -110,21 +110,21 @@ public class TestRunner {
         }
     }
 
-    private static boolean expectsExceptions(Method method) {
+    private boolean expectsExceptions(Method method) {
         return method.getDeclaredAnnotation(Test.class).expected() != Test.None.class;
     }
 
-    private static boolean isExpectedException(Exception exception, Method method) {
+    private boolean isExpectedException(Exception exception, Method method) {
         return exception.getCause().getClass().equals(method.getDeclaredAnnotation(Test.class).expected());
     }
 
-    private static void tearDown(Object test) throws Throwable {
+    private void tearDown(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Tearing down " + testClass.getSimpleName() + "...");
         executeAnnotatedMethods(test, After.class);
     }
 
-    private static void executeAnnotatedMethods(Object test, Class<? extends Annotation> annotationClass) throws Throwable {
+    private void executeAnnotatedMethods(Object test, Class<? extends Annotation> annotationClass) throws Throwable {
         for (Method method : test.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(annotationClass)) {
                 out.log("Executing tear down method: " + method.getName());
@@ -134,23 +134,23 @@ public class TestRunner {
         }
     }
 
-    private static void logSkipWholeTest(Class t, Throwable e) {
+    private void logSkipWholeTest(Class t, Throwable e) {
         out.log(skipWholeTestMessage(exceptionMessage(t, e)));
     }
 
-    private static void logSkipTestCase(Class t, Throwable e) {
+    private void logSkipTestCase(Class t, Throwable e) {
         out.log(skipTestCaseMessage(exceptionMessage(t, e)));
     }
 
-    private static String skipWholeTestMessage(String errorMessage) {
+    private String skipWholeTestMessage(String errorMessage) {
         return errorMessage;
     }
 
-    private static String skipTestCaseMessage(String errorMessage) {
+    private String skipTestCaseMessage(String errorMessage) {
         return errorMessage;
     }
 
-    private static String exceptionMessage(Class t, Throwable e) {
+    private String exceptionMessage(Class t, Throwable e) {
         String message = t.getName() + " raised an exception:\n";
         message += "Exception type: " + e.getClass().getSimpleName() + "\n";
         message += "Exception message: " + e.getMessage();
