@@ -1,4 +1,4 @@
-package com.myunit.metatest;
+package com.myunit.selftest;
 
 import com.myunit.test.Test;
 

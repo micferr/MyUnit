@@ -1,10 +1,10 @@
-package com.myunit.metatest;
+package com.myunit.selftest;
 
 import com.myunit.test.*;
 
 import static com.myunit.assertion.Assert.*;
 
-public class MetaTestSuite {
+public class SelfTestSuite {
     @Test(expected = AssertionError.class)
     void testFail() {
         fail();
@@ -12,7 +12,7 @@ public class MetaTestSuite {
 
     public static void main(String[] args){
         new TestRunner().run(
-                MetaTestSuite.class,
+                SelfTestSuite.class,
                 AssertTrueFalse.class,
                 AssertEquals.class,
                 AssertNotEquals.class,
