@@ -1,5 +1,6 @@
 package com.myunit.selftest;
 
+import com.myunit.assertion.TestFailedError;
 import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.assertNotEquals;
@@ -20,5 +21,10 @@ public class AssertNotEquals {
         assertNotEquals('a', 'b');
         assertNotEquals(true, false);
         assertNotEquals(false, true);
+    }
+
+    @Test(expected = TestFailedError.class)
+    void testAssertNotEquals_actuallyEquals_null_null() {
+        assertNotEquals(null, null);
     }
 }

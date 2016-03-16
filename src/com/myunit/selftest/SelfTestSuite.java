@@ -1,11 +1,12 @@
 package com.myunit.selftest;
 
+import com.myunit.assertion.TestFailedError;
 import com.myunit.test.*;
 
 import static com.myunit.assertion.Assert.*;
 
 public class SelfTestSuite {
-    @Test(expected = AssertionError.class)
+    @Test(expected = TestFailedError.class)
     void testFail() {
         fail();
     }

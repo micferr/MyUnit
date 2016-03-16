@@ -6,11 +6,11 @@ import java.util.Objects;
 public class Assert {
 
     public static void fail() {
-        throw new AssertionError();
+        throw new TestFailedError();
     }
 
     public static void fail(String message) {
-        throw new AssertionError(message);
+        throw new TestFailedError(message);
     }
 
     // Assert True / False

@@ -1,5 +1,6 @@
 package com.myunit.test;
 
+import com.myunit.assertion.TestFailedError;
 import com.myunit.log.Logger;
 import com.myunit.log.LoggerBuilder;
 
@@ -94,7 +95,7 @@ public class TestRunner {
             method.setAccessible(true);
             method.invoke(test);
             if (expectsExceptions(method)) {
-                throw new AssertionError(method.getName() +
+                throw new TestFailedError(method.getName() +
                         " returned without throwing an exception, but expected one of type " +
                         method.getDeclaredAnnotation(Test.class).expected().getName()
                 );
