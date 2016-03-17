@@ -1,6 +1,5 @@
 package com.myunit.selftest;
 
-import static com.myunit.assertion.Assert.*;
 import com.myunit.assertion.TestFailedError;
 import com.myunit.test.Test;
 

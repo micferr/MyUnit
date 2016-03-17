@@ -9,7 +9,7 @@ public class AssertEquals {
     @Test
     void testAssertEquals_actuallyEquals() {
         assertEquals(null, null);
-        assertEquals("aaaa", "aaaa");
+        assertEquals("foo", "foo");
         assertEquals((byte)1, (byte)1);
         assertEquals((short)2, (short)2);
         assertEquals(3, 3);

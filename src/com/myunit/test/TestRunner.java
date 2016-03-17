@@ -43,11 +43,11 @@ public class TestRunner {
                 executeTests(test);
                 tearDown(test);
             } catch (Throwable exception) {
-                logSkipWholeTest(testClass, exception);
+                out.logSkipWholeTest(testClass, exception);
             }
             out.logTestEnd();
         }
-        logRunResults();
+        out.logSuiteResults(executedTests-failedTests, failedTests);
     }
 
     private Object buildTest(Class<?> testClass) throws Throwable {
@@ -143,26 +143,5 @@ public class TestRunner {
                 method.invoke(test);
             }
         }
-    }
-
-    private void logSkipWholeTest(Class t, Throwable e) {
-        out.log(skipWholeTestMessage(exceptionMessage(t, e)));
-    }
-
-    private String skipWholeTestMessage(String errorMessage) {
-        return errorMessage;
-    }
-
-    private String exceptionMessage(Class t, Throwable e) {
-        String message = t.getName() + " raised an exception:\n";
-        message += "Exception type: " + e.getClass().getSimpleName() + "\n";
-        message += "Exception message: " + e.getMessage();
-        return message;
-    }
-
-    private void logRunResults() {
-        /*out.log("Executed tests: " + executedTests);
-        out.log("Failed tests: " + failedTests);*/
-        out.logSuiteResults(executedTests-failedTests, failedTests);
     }
 }

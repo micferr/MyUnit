@@ -11,7 +11,7 @@ public class AssertNotEquals {
         assertNotEquals(null, new Object());
         assertNotEquals(new Object(), null);
         assertNotEquals(1, new Object());
-        assertNotEquals(new Object(), new String());
+        assertNotEquals(new Object(), "");
         assertNotEquals((byte)0, (byte)1);
         assertNotEquals((short)2, (short)3);
         assertNotEquals(4, 5);
