@@ -6,6 +6,9 @@ import com.myunit.test.Test;
 import static com.myunit.assertion.Assert.fail;
 
 public class AssertMiscellaneous {
+    @Test
+    void testEmptyTest() {}
+
     @Test(expected = TestFailedError.class)
     void testFail() {
         fail();
