@@ -9,7 +9,8 @@ public class SelfTestSuite {
                 AssertTrueFalse.class,
                 AssertEquals.class,
                 AssertNotEquals.class,
-                AssertGreaterThan.class
+                AssertGreaterThan.class,
+                AssertLessThan.class
         );
     }
 }
