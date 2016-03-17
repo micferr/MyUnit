@@ -10,6 +10,7 @@ public class HTMLLogger implements Logger {
     private String logFile;
     private String extraLogs;
     private boolean autoOpenLog;
+    private boolean writeEventLog;
 
     public HTMLLogger(String file) {
         try {
@@ -20,7 +21,18 @@ public class HTMLLogger implements Logger {
         logFile = file;
         extraLogs = "";
         autoOpenLog = true;
+        writeEventLog = false;
         stream.print("<html><head></head><body>");
+    }
+
+    public HTMLLogger openLogAfterTests(boolean autoOpenLog) {
+        this.autoOpenLog = autoOpenLog;
+        return this;
+    }
+
+    public HTMLLogger writeEventLog(boolean writeEventLog) {
+        this.writeEventLog = writeEventLog;
+        return this;
     }
 
     @Override
@@ -74,7 +86,9 @@ public class HTMLLogger implements Logger {
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {
         stream.print("</body></html>\n\n");
-        stream.print("Logs:<br /><br />\n"+extraLogs+"<br />\n");
+        if (writeEventLog) {
+            stream.print("Logs:<br /><br />\n" + extraLogs + "<br />\n");
+        }
         stream.print("Executed tests: " + (passedTests+failedTests) + "<br />\n"
                 + "Passed: " + passedTests + "<br />\n"
                 + "Failed: " + failedTests + "<br />\n");
