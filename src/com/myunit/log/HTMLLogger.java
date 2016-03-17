@@ -51,7 +51,7 @@ public class HTMLLogger implements Logger {
         stream.print("<td><font color=\"red\">Fail</font></td><td>"+throwable.getClass().getName());
         String message = throwable.getMessage();
         if (message != null) {
-            stream.print(message);
+            stream.print(" - " + message);
         }
         stream.print("</td></tr>\n");
     }
