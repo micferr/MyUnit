@@ -37,8 +37,12 @@ public class StreamLogger implements Logger {
     }
 
     @Override
-    public void logTestCaseFail() {
+    public void logTestCaseFail(Throwable throwable) {
         stream.println("Fail");
+        stream.println("Exception Raised: " + throwable.getClass().getName());
+        if (throwable.getMessage() != null) {
+            stream.println("Exception Message: " + throwable.getMessage());
+        }
     }
 
     @Override
@@ -49,8 +53,10 @@ public class StreamLogger implements Logger {
     }
 
     @Override
-    public void logTestEnd() { stream.println(""); }
+    public void logTestBegin(Class testClass) {}
 
+    @Override
+    public void logTestEnd() { stream.println(""); }
 
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {

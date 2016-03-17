@@ -37,6 +37,7 @@ public class TestRunner {
         failedTests = 0;
         executedTests = 0;
         for (Class testClass : testClasses) {
+            out.logTestBegin(testClass);
             try {
                 Object test = buildTest(testClass);
                 setUp(test);
@@ -61,7 +62,7 @@ public class TestRunner {
         executeAnnotatedMethods(test, Before.class);
     }
 
-    private void executeTests(Object test) throws Throwable {
+    private void executeTests(Object test) {
         Class testClass = test.getClass();
         out.log("Testing " + testClass.getSimpleName() + "...");
         getSortedTests(testClass).forEach((method) -> {
@@ -103,11 +104,10 @@ public class TestRunner {
             method.setAccessible(true);
             method.invoke(test);
             if (expectsExceptions(method)) {
-                onFailedTest();
-                throw new TestFailedError(method.getName() +
+                TestFailedError error = new TestFailedError(method.getName() +
                         " returned without throwing an exception, but expected one of type " +
-                        method.getDeclaredAnnotation(Test.class).expected().getName()
-                );
+                        method.getDeclaredAnnotation(Test.class).expected().getName());
+                onFailedTest(error);
             }
             out.logTestCaseSuccess();
         } catch (InvocationTargetException exception) {
@@ -115,11 +115,10 @@ public class TestRunner {
                 out.logTestCaseSuccess();
                 return;
             }
-            out.logExceptionRaised(test.getClass(), method, exception.getCause());
-            onFailedTest();
+            onFailedTest(exception.getCause());
         } catch (IllegalAccessException exception) {
             out.log("Should never happen.");
-            onFailedTest();
+            onFailedTest(exception.getCause());
         }
     }
 
@@ -131,9 +130,9 @@ public class TestRunner {
         return exception.getCause().getClass().equals(method.getDeclaredAnnotation(Test.class).expected());
     }
 
-    private void onFailedTest() {
+    private void onFailedTest(Throwable throwable) {
         failedTests++;
-        out.logTestCaseFail();
+        out.logTestCaseFail(throwable);
     }
 
     private void tearDown(Object test) throws Throwable {

@@ -7,8 +7,9 @@ public interface Logger {
     void logExceptionRaised(Class testClass, Method method, Throwable errorCause);
     void logExecutingMethod(Method method);
     void logTestCaseSuccess();
-    void logTestCaseFail();
+    void logTestCaseFail(Throwable error);
     void logSkipWholeTest(Class testClass, Throwable throwable);
+    void logTestBegin(Class testClass);
     void logTestEnd();
     void logSuiteResults(int passedTests, int failedTests);
 }
