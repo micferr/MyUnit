@@ -108,8 +108,9 @@ public class TestRunner {
                         " returned without throwing an exception, but expected one of type " +
                         method.getDeclaredAnnotation(Test.class).expected().getName());
                 onFailedTest(error);
+            } else {
+                out.logTestCaseSuccess();
             }
-            out.logTestCaseSuccess();
         } catch (InvocationTargetException exception) {
             if (isExpectedException(exception, method)) {
                 out.logTestCaseSuccess();
