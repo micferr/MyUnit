@@ -45,7 +45,7 @@ public class TestRunner {
             } catch (Throwable exception) {
                 logSkipWholeTest(testClass, exception);
             }
-            out.log("");
+            out.logTestEnd();
         }
         logRunResults();
     }
@@ -113,7 +113,7 @@ public class TestRunner {
             if (isExpectedException(exception, method)) {
                 return;
             }
-            logSkipTestCase(test.getClass(), exception.getCause());
+            out.logExceptionRaised(test.getClass(), method, exception.getCause());
             failedTests++;
         } catch (IllegalAccessException exception) {
             out.log("Should never happen.");
@@ -149,15 +149,7 @@ public class TestRunner {
         out.log(skipWholeTestMessage(exceptionMessage(t, e)));
     }
 
-    private void logSkipTestCase(Class t, Throwable e) {
-        out.log(skipTestCaseMessage(exceptionMessage(t, e)));
-    }
-
     private String skipWholeTestMessage(String errorMessage) {
-        return errorMessage;
-    }
-
-    private String skipTestCaseMessage(String errorMessage) {
         return errorMessage;
     }
 
@@ -169,7 +161,8 @@ public class TestRunner {
     }
 
     private void logRunResults() {
-        out.log("Executed tests: " + executedTests);
-        out.log("Failed tests: " + failedTests);
+        /*out.log("Executed tests: " + executedTests);
+        out.log("Failed tests: " + failedTests);*/
+        out.logSuiteResults(executedTests-failedTests, failedTests);
     }
 }

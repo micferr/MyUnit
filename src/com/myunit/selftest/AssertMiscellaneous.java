@@ -1,5 +1,6 @@
 package com.myunit.selftest;
 
+import static com.myunit.assertion.Assert.*;
 import com.myunit.assertion.TestFailedError;
 import com.myunit.test.Test;
 
@@ -12,7 +13,7 @@ public class AssertMiscellaneous {
     }
 
     @Test(expected = ArithmeticException.class)
-    void test_RuntimeException() {
+    void testRuntimeException() {
         int x = 5/0;
     }
 }

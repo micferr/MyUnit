@@ -3,6 +3,8 @@ package com.myunit.selftest;
 import com.myunit.assertion.TestFailedError;
 import com.myunit.test.*;
 
+import java.io.PrintStream;
+
 import static com.myunit.assertion.Assert.*;
 
 public class SelfTestSuite {

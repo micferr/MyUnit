@@ -3,9 +3,9 @@ package com.myunit.log;
 import java.io.PrintStream;
 
 public class LoggerBuilder {
-    Object logger;
-    LoggerType type;
-    java.util.logging.Level logLevel;
+    private Object logger;
+    private LoggerType type;
+    private java.util.logging.Level logLevel;
 
     public LoggerBuilder setLogger(Object o) {
         logger = o;
