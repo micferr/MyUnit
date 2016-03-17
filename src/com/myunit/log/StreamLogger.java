@@ -27,6 +27,21 @@ public class StreamLogger implements Logger {
     }
 
     @Override
+    public void logExecutingMethod(Method method) {
+        stream.print("Executing " + method.getName() + "... ");
+    }
+
+    @Override
+    public void logTestCaseSuccess() {
+        stream.println("Success");
+    }
+
+    @Override
+    public void logTestCaseFail() {
+        stream.println("Fail");
+    }
+
+    @Override
     public void logSkipWholeTest(Class testClass, Throwable throwable) {
         String message = testClass.getName() + " raised a fatal exception of type " +
                 throwable.getClass().getName() + ". Testing of this class stopped.";

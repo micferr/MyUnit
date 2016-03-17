@@ -97,27 +97,29 @@ public class TestRunner {
     }
 
     private void testMethod(Object test, Method method) {
-        out.log("Executing test method: " + method.getName());
+        out.logExecutingMethod(method);
         executedTests++;
         try {
             method.setAccessible(true);
             method.invoke(test);
             if (expectsExceptions(method)) {
-                failedTests++;
+                onFailedTest();
                 throw new TestFailedError(method.getName() +
                         " returned without throwing an exception, but expected one of type " +
                         method.getDeclaredAnnotation(Test.class).expected().getName()
                 );
             }
+            out.logTestCaseSuccess();
         } catch (InvocationTargetException exception) {
             if (isExpectedException(exception, method)) {
+                out.logTestCaseSuccess();
                 return;
             }
             out.logExceptionRaised(test.getClass(), method, exception.getCause());
-            failedTests++;
+            onFailedTest();
         } catch (IllegalAccessException exception) {
             out.log("Should never happen.");
-            failedTests++;
+            onFailedTest();
         }
     }
 
@@ -127,6 +129,11 @@ public class TestRunner {
 
     private boolean isExpectedException(Exception exception, Method method) {
         return exception.getCause().getClass().equals(method.getDeclaredAnnotation(Test.class).expected());
+    }
+
+    private void onFailedTest() {
+        failedTests++;
+        out.logTestCaseFail();
     }
 
     private void tearDown(Object test) throws Throwable {
