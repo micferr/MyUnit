@@ -37,9 +37,7 @@ public class AssertEquals {
     }
 
     @Test(expected = TestFailedError.class)
-    void testAssertEquals_actuallyNotEquals_byte() {
-        assertEquals((byte)0, (byte)1);
-    }
+    void testAssertEquals_actuallyNotEquals_byte() { assertEquals((byte)0, (byte)1); }
 
     @Test(expected = TestFailedError.class)
     void testAssertEquals_actuallyNotEquals_short() {
@@ -57,14 +55,20 @@ public class AssertEquals {
     }
 
     @Test(expected = TestFailedError.class)
-    void testAssertEquals_actuallyNotEquals_float() {
+    void testAssertEquals_actuallyNotEquals_float_noTolerance() {
         assertEquals(0.f, 1.f);
     }
 
     @Test(expected = TestFailedError.class)
-    void testAssertEquals_actuallyNotEquals_double() {
+    void testAssertEquals_actuallyNotEquals_float_tolerance() { assertEquals(0.f, 1.f, 0.1f); }
+
+    @Test(expected = TestFailedError.class)
+    void testAssertEquals_actuallyNotEquals_double_noTolerance() {
         assertEquals(0.d, 1.d);
     }
+
+    @Test(expected = TestFailedError.class)
+    void testAssertEquals_actuallyNotEquals_double_tolerance() { assertEquals(0.d, 1.d, 0.1d); }
 
     @Test(expected = TestFailedError.class)
     void testAssertEquals_actuallyNotEquals_boolean() {
