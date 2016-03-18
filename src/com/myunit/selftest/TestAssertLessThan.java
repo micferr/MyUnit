@@ -5,7 +5,7 @@ import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.assertLessThan;
 
-public class AssertLessThan {
+public class TestAssertLessThan {
     @Test
     void testAssertLessThan_actuallyLessThan() {
         assertLessThan((byte) 0, (byte) 1);

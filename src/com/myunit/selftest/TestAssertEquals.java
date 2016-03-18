@@ -5,7 +5,7 @@ import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.assertEquals;
 
-public class AssertEquals {
+public class TestAssertEquals {
     @Test
     void testAssertEquals_actuallyEquals() {
         assertEquals(null, null);

@@ -2,7 +2,6 @@ package com.myunit.assertion;
 
 import java.util.Objects;
 
-@SuppressWarnings("unused")
 public class Assert {
 
     public static void fail() {

@@ -5,7 +5,7 @@ import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.*;
 
-public class AssertTrueFalse {
+public class TestAssertTrueFalse {
     @Test
     void testAssertTrue_actuallyTrue() {
         assertTrue(true);

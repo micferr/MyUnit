@@ -5,7 +5,7 @@ import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.fail;
 
-public class AssertMiscellaneous {
+public class TestAssertMiscellaneous {
     @Test
     void testEmptyTest() {}
 

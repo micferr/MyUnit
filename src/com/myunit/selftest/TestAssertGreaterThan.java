@@ -5,7 +5,7 @@ import com.myunit.test.Test;
 
 import static com.myunit.assertion.Assert.assertGreaterThan;
 
-public class AssertGreaterThan {
+public class TestAssertGreaterThan {
     @Test
     void testAssertGreaterThan_actuallyGreaterThan() {
         assertGreaterThan((byte) 1, (byte) 0);
