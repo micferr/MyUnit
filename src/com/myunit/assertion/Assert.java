@@ -12,29 +12,10 @@ public class Assert {
         throw new TestFailedError(message);
     }
 
-    // Assert True / False
-
-    public static void assertTrue(boolean expression, String message) {
-        if (!expression) {
-            if (message != null) {
-                fail(message);
-            } else {
-                fail();
-            }
-        }
-    }
-
-    public static void assertTrue(boolean expression) {
-        assertTrue(expression, null);
-    }
-
-    public static void assertFalse(boolean expression, String message) {
-        assertTrue(!expression, message);
-    }
-
-    public static void assertFalse(boolean expression) {
-        assertFalse(expression, null);
-    }
+    public static void assertTrue(boolean expression, String message) { AssertTrueFalse.assertTrue(expression, message); }
+    public static void assertTrue(boolean expression) { AssertTrueFalse.assertTrue(expression); }
+    public static void assertFalse(boolean expression, String message) { AssertTrueFalse.assertFalse(expression, message); }
+    public static void assertFalse(boolean expression) { AssertTrueFalse.assertFalse(expression); }
 
     // Assert Equals / NotEquals
 
