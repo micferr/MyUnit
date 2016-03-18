@@ -37,11 +37,11 @@ public class Assert {
         assertFalse(expression, null);
     }
 
-    static void assertEquals(Object actual, Object expected, String message) {
+    // Assert Equals / NotEquals
+
+    public static void assertEquals(Object actual, Object expected, String message) {
         assertTrue(Objects.equals(actual, expected), message);
     }
-
-    // Assert Equals / NotEquals
 
     public static void assertEquals(Object actual, Object expected) {
         assertEquals(actual, expected, null);
