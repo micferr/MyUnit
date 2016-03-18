@@ -2,7 +2,7 @@ package com.myunit.test;
 
 import com.myunit.assertion.TestFailedError;
 import com.myunit.log.Logger;
-import com.myunit.log.LoggerBuilder;
+import com.myunit.log.StreamLogger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -16,11 +16,11 @@ public class TestRunner {
     private int executedTests;
 
     public TestRunner() {
-        this(System.out);
+        this(new StreamLogger(System.out));
     }
 
-    public TestRunner(Object o) {
-        out = new LoggerBuilder().setLogger(o).build();
+    public TestRunner(Logger logger) {
+        out = logger;
         failedTests = 0;
         executedTests = 0;
     }
