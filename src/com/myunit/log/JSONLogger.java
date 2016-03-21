@@ -2,55 +2,55 @@ package com.myunit.log;
 
 import java.lang.reflect.Method;
 
-public class HTMLLogger implements Logger {
+public class JSONLogger implements Logger {
     private FileLogger fileLogger;
 
-    public HTMLLogger(String file) {
+    public JSONLogger(String file) {
         fileLogger = new FileLogger(file);
-        fileLogger.log("<html><head></head><body>");
+        fileLogger.log("<testSuite>\n");
     }
 
-    public HTMLLogger openLogAfterTests(boolean autoOpenLog) {
+    public JSONLogger openLogAfterTests(boolean autoOpenLog) {
         fileLogger.openLogAfterTests(autoOpenLog);
         return this;
     }
 
-    public HTMLLogger writeEventLog(boolean writeEventLog) {
+    public JSONLogger writeEventLog(boolean writeEventLog) {
         fileLogger.writeEventLog(writeEventLog);
         return this;
     }
 
     @Override
     public void log(String message) {
-        fileLogger.logEvent(message + "<br />");
+        fileLogger.logEvent(message + "\n");
     }
 
     @Override
     public void logExceptionRaised(Class testClass, Method method, Throwable errorCause) {
-        fileLogger.logEvent(testClass.getName() + "#" + method.getName() +
+        fileLogger.logEvent("<exceptionmessage>"+testClass.getName() + "#" + method.getName() +
                 "raised an exception of type " + errorCause.getClass().getName() +
                 (errorCause.getMessage() != null ? "with message: " + errorCause.getMessage() : "") +
-                "<br />");
+                "</exceptionmessage>");
     }
 
     @Override
     public void logExecutingMethod(Method method) {
-        fileLogger.log("<tr><td>"+method.getName()+"</td>");
+        fileLogger.log("<method><name>"+method.getName()+"</name>");
     }
 
     @Override
     public void logTestCaseSuccess() {
-        fileLogger.log("<td><font color=\"green\">Success</font></td><td></td></tr>\n");
+        fileLogger.log("<result>Success</result></method>\n");
     }
 
     @Override
     public void logTestCaseFail(Throwable throwable) {
-        fileLogger.log("<td><font color=\"red\">Fail</font></td><td>"+throwable.getClass().getName()+"</td>");
+        fileLogger.log("<result>Fail</result><failcause>"+throwable.getClass().getName()+"</failcause>");
         String message = throwable.getMessage();
         if (message != null) {
-            fileLogger.log("<td>" + message + "</td>");
+            fileLogger.log("<failmessage>" + message + "</failmessage>");
         }
-        fileLogger.log("</tr>\n");
+        fileLogger.log("</method>\n");
     }
 
     @Override
@@ -60,20 +60,19 @@ public class HTMLLogger implements Logger {
 
     @Override
     public void logTestBegin(Class testClass) {
-        fileLogger.log("<table>\n<tr><td colspan=\"4\">"+testClass.getName()+"</td></tr>\n");
+        fileLogger.log("<testclass><name>"+testClass.getName()+"</name>\n");
     }
 
     @Override
     public void logTestEnd() {
-        fileLogger.log("</table><br />\n");
+        fileLogger.log("</testclass>\n");
     }
 
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {
-        fileLogger.log("</body></html>\n\n");
-        fileLogger.log("Executed tests: " + (passedTests+failedTests) + "<br />\n"
-                + "Passed: " + passedTests + "<br />\n"
-                + "Failed: " + failedTests + "<br />\n");
+        fileLogger.log("<executedtests>" + (passedTests + failedTests) + "</executedmethods>\n"
+                + "<passedtests>" + passedTests + "</passedtests>\n"
+                + "<failedtests>" + failedTests + "</failedtests></testSuite>");
         fileLogger.end();
     }
 }
