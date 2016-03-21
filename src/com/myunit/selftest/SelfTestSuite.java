@@ -11,7 +11,10 @@ public class SelfTestSuite {
                 TestAssertEquals.class,
                 TestAssertNotEquals.class,
                 TestAssertGreaterThan.class,
-                TestAssertLessThan.class
+                TestAssertLessThan.class,
+                TestAssertGreaterThanOrEquals.class,
+                TestAssertLessThanOrEquals.class,
+                TestNullNotNull.class
         );
     }
 }

@@ -1,6 +1,6 @@
 package com.myunit.assertion;
 
-import static com.myunit.assertion.Assert.*;
+import static com.myunit.assertion.Assert.fail;
 
 public class AssertTrueFalse {
     public static void assertTrue(boolean expression, String message) {

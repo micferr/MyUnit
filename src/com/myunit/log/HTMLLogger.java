@@ -60,12 +60,12 @@ public class HTMLLogger implements Logger {
 
     @Override
     public void logTestCaseFail(Throwable throwable) {
-        stream.print("<td><font color=\"red\">Fail</font></td><td>"+throwable.getClass().getName());
+        stream.print("<td><font color=\"red\">Fail</font></td><td>"+throwable.getClass().getName()+"</td>");
         String message = throwable.getMessage();
         if (message != null) {
-            stream.print(" - " + message);
+            stream.print("<td>" + message + "</td>");
         }
-        stream.print("</td></tr>\n");
+        stream.print("</tr>\n");
     }
 
     @Override
