@@ -70,7 +70,7 @@ public class XMLLogger implements Logger {
 
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {
-        fileLogger.log("<executedtests>" + (passedTests + failedTests) + "</executedmethods>\n"
+        fileLogger.log("<executedtests>" + (passedTests + failedTests) + "</executedtests>\n"
                 + "<passedtests>" + passedTests + "</passedtests>\n"
                 + "<failedtests>" + failedTests + "</failedtests></testSuite>");
         fileLogger.end();
