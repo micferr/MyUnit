@@ -2,20 +2,20 @@ package com.myunit.log;
 
 import java.lang.reflect.Method;
 
-public class JSONLogger implements Logger {
+public class XMLLogger implements Logger {
     private FileLogger fileLogger;
 
-    public JSONLogger(String file) {
+    public XMLLogger(String file) {
         fileLogger = new FileLogger(file);
         fileLogger.log("<testSuite>\n");
     }
 
-    public JSONLogger openLogAfterTests(boolean autoOpenLog) {
+    public XMLLogger openLogAfterTests(boolean autoOpenLog) {
         fileLogger.openLogAfterTests(autoOpenLog);
         return this;
     }
 
-    public JSONLogger writeEventLog(boolean writeEventLog) {
+    public XMLLogger writeEventLog(boolean writeEventLog) {
         fileLogger.writeEventLog(writeEventLog);
         return this;
     }
