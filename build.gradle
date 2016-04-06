@@ -1,2 +1,16 @@
-apply plugin: 'idea'
 apply plugin: 'java'
+
+task compileJavaClasses (type: JavaCompile)
+task runTestSuite (type: JavaExec)
+
+compileJavaClasses {
+ source = fileTree(dir: 'src', include: '**/*.java')
+ destinationDir = file('build/classes/main')
+ classpath = files('build/classes/main')
+}
+
+runSelfTestSuite {
+  classpath sourceSets.main.runtimeClasspath
+  main = "com.myunit.selftest.SelfTestSuite"
+}
+tasks.runTestSuite.dependsOn(compileJavaClasses)
