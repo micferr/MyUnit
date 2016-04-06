@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 task compileJavaClasses (type: JavaCompile)
-task runTestSuite (type: JavaExec)
+task runSelfTestSuite (type: JavaExec)
 
 compileJavaClasses {
  source = fileTree(dir: 'src', include: '**/*.java')
