@@ -13,4 +13,4 @@ runSelfTestSuite {
   classpath sourceSets.main.runtimeClasspath
   main = "com.myunit.selftest.SelfTestSuite"
 }
-tasks.runTestSuite.dependsOn(compileJavaClasses)
+tasks.runSelfTestSuite.dependsOn(compileJavaClasses)
