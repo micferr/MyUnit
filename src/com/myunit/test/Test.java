@@ -13,4 +13,5 @@ public @interface Test {
     }
 
     Class<? extends Throwable> expected() default None.class;
+    boolean optional() default false;
 }

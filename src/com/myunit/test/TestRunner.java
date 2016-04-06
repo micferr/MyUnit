@@ -14,6 +14,7 @@ public class TestRunner {
     private Logger out;
     private int failedTests;
     private int executedTests;
+    private boolean runOptionalTests;
 
     public TestRunner() {
         this(new StreamLogger(System.out));
@@ -23,6 +24,7 @@ public class TestRunner {
         out = logger;
         failedTests = 0;
         executedTests = 0;
+        runOptionalTests = true;
     }
 
     public Logger getLogger() {
@@ -31,6 +33,11 @@ public class TestRunner {
 
     public void setLogger(Logger stream) {
         out = stream;
+    }
+
+    public TestRunner runOptionalTests(boolean runOptTests) {
+        this.runOptionalTests = runOptTests;
+        return this;
     }
 
     public void run(Class... testClasses) {
@@ -76,7 +83,10 @@ public class TestRunner {
         Method[] methods = testClass.getDeclaredMethods();
         List<Method> tests = new ArrayList<>();
         for (Method method : methods) {
-            if (method.isAnnotationPresent(Test.class)) {
+            boolean methodHasTestAnnotation = method.isAnnotationPresent(Test.class),
+                    isOptionalTest =
+                            methodHasTestAnnotation && method.getDeclaredAnnotation(Test.class).optional();
+            if (methodHasTestAnnotation && (!isOptionalTest || runOptionalTests)) {
                 tests.add(method);
             }
         }
