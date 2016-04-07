@@ -1,11 +1,14 @@
 package com.myunit.selftest;
 
-import com.myunit.log.HTMLLogger;
+import com.myunit.log.JUnitXMLLogger;
 import com.myunit.test.*;
 
 public class SelfTestSuite {
     public static void main(String[] args){
-        new TestRunner(new HTMLLogger("log.html")).run(
+        new TestRunner(
+                new JUnitXMLLogger("log.xml")
+                        .openLogAfterTests(false)
+        ).run(
                 TestAssertMiscellaneous.class,
                 TestAssertTrueFalse.class,
                 TestAssertEquals.class,
