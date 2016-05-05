@@ -33,5 +33,16 @@ public class SelfTestSuite {
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
         );
+        /*new com.myunit.log.gui.GuiLogger(
+                TestAssertMiscellaneous.class,
+                TestAssertTrueFalse.class,
+                TestAssertEquals.class,
+                TestAssertNotEquals.class,
+                TestAssertGreaterThan.class,
+                TestAssertLessThan.class,
+                TestAssertGreaterThanOrEquals.class,
+                TestAssertLessThanOrEquals.class,
+                TestNullNotNull.class
+        ).run(args);*/
     }
 }

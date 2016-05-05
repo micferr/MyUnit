@@ -2,7 +2,7 @@ package com.myunit.log;
 
 import java.lang.reflect.Method;
 
-public class HTMLLogger implements Logger {
+public class HTMLLogger extends LoggerAdapter implements Logger {
     private FileLogger fileLogger;
 
     public HTMLLogger(String file) {

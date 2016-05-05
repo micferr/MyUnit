@@ -3,7 +3,7 @@ package com.myunit.log;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
-public class StreamLogger implements Logger {
+public class StreamLogger extends LoggerAdapter implements Logger {
     private PrintStream stream;
 
     public StreamLogger(PrintStream stream) {

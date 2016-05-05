@@ -7,6 +7,12 @@ public class LoggerAdapter implements Logger {
     public void log(String message) {}
 
     @Override
+    public void logClassNumTests(int numTests) {}
+
+    @Override
+    public void logTotalNumTests(int numTests) {}
+
+    @Override
     public void logExceptionRaised(Class testClass, Method method, Throwable errorCause) {}
 
     @Override
@@ -29,4 +35,7 @@ public class LoggerAdapter implements Logger {
 
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {}
+
+    @Override
+    public void endLog(boolean interrupted) {}
 }

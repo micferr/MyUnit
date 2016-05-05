@@ -15,6 +15,7 @@ public class TestRunner {
     private int failedTests;
     private int executedTests;
     private boolean runOptionalTests;
+    private boolean interrupted;
 
     public TestRunner() {
         this(new StreamLogger(System.out));
@@ -25,6 +26,7 @@ public class TestRunner {
         failedTests = 0;
         executedTests = 0;
         runOptionalTests = true;
+        interrupted = false;
     }
 
     public Logger getLogger() {
@@ -40,22 +42,55 @@ public class TestRunner {
         return this;
     }
 
+    public void interrupt() {
+        this.interrupted = true;
+    }
+
     public void run(Class... testClasses) {
-        failedTests = 0;
-        executedTests = 0;
-        for (Class testClass : testClasses) {
-            out.logTestBegin(testClass);
-            try {
-                Object test = buildTest(testClass);
-                setUp(test);
-                executeTests(test);
-                tearDown(test);
-            } catch (Throwable exception) {
-                out.logSkipWholeTest(testClass, exception);
+        if (testClasses != null) {
+            out.logTotalNumTests(countTotalTests(testClasses));
+            failedTests = 0;
+            executedTests = 0;
+            for (Class testClass : testClasses) {
+                out.logTestBegin(testClass);
+                out.logClassNumTests(countClassTests(testClass));
+                try {
+                    Object test = buildTest(testClass);
+                    setUp(test);
+                    executeTests(test);
+                    tearDown(test);
+                } catch (Throwable exception) {
+                    out.logSkipWholeTest(testClass, exception);
+                }
+                out.logTestEnd();
+                if (this.interrupted) {
+                    out.endLog(true);
+                    return;
+                }
             }
-            out.logTestEnd();
+            out.logSuiteResults(executedTests - failedTests, failedTests);
+            out.endLog(false);
+        } else {
+            throw new NullPointerException("Null array passed to run");
         }
-        out.logSuiteResults(executedTests-failedTests, failedTests);
+    }
+
+    private int countTotalTests(Class... testClasses) {
+        int count = 0;
+        for (Class c : testClasses) {
+            count += countClassTests(c);
+        }
+        return count;
+    }
+
+    private int countClassTests(Class c) {
+        int count = 0;
+        for (Method m : c.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(Test.class)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private Object buildTest(Class<?> testClass) throws Throwable {
@@ -69,7 +104,7 @@ public class TestRunner {
         executeAnnotatedMethods(test, Before.class);
     }
 
-    private void executeTests(Object test) {
+    protected void executeTests(Object test) {
         Class testClass = test.getClass();
         out.log("Testing " + testClass.getSimpleName() + "...");
         getSortedTests(testClass).forEach((method) -> {
@@ -107,7 +142,7 @@ public class TestRunner {
         return tests;
     }
 
-    private void testMethod(Object test, Method method) {
+    protected void testMethod(Object test, Method method) {
         out.logExecutingMethod(method);
         executedTests++;
         try {

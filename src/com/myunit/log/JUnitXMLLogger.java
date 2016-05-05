@@ -2,7 +2,7 @@ package com.myunit.log;
 
 import java.lang.reflect.Method;
 
-public class JUnitXMLLogger implements Logger {
+public class JUnitXMLLogger extends LoggerAdapter implements Logger {
     FileLogger fileLogger;
     String buffer;
 
