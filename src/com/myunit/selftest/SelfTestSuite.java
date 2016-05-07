@@ -19,7 +19,7 @@ public class SelfTestSuite {
      * @param args      testing params, currently unused
      */
     public static void main(String[] args){
-        new TestRunner(
+        /*new TestRunner(
                 new JUnitXMLLogger("log.xml")
                         .openLogAfterTests(false)
         ).run(
@@ -32,8 +32,8 @@ public class SelfTestSuite {
                 TestAssertGreaterThanOrEquals.class,
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
-        );
-        /*new com.myunit.log.gui.GuiLogger(
+        );*/
+        new com.myunit.log.gui.GuiLogger(
                 TestAssertMiscellaneous.class,
                 TestAssertTrueFalse.class,
                 TestAssertEquals.class,
@@ -43,6 +43,6 @@ public class SelfTestSuite {
                 TestAssertGreaterThanOrEquals.class,
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
-        ).run(args);*/
+        ).run(args);
     }
 }

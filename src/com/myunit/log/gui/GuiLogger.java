@@ -3,7 +3,7 @@ package com.myunit.log.gui;
 import com.myunit.log.Logger;
 import com.myunit.log.MultiLogger;
 import com.myunit.test.TestRunner;
-import com.sun.javafx.scene.control.Logging;
+import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,8 +14,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import sun.util.logging.PlatformLogger;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +32,7 @@ import java.util.Objects;
 public class GuiLogger extends Application implements Logger {
     private static MultiLogger externalLogger = null;
     private static Class[] testClasses = new Class[]{};
-    private static boolean initialized = false;
+    private static volatile boolean initialized = false;
     /**
      * Signal whether the test execution has been interrupted,
      * e.g. by closing the test window.
@@ -60,6 +62,7 @@ public class GuiLogger extends Application implements Logger {
     private TableView<TableRowData> resultTable;
     private TextArea textArea;
     private ProgressBar progressBar;
+    private Transition progressBarTransition;
     private Thread testThread;
 
     public GuiLogger() {
@@ -153,58 +156,6 @@ public class GuiLogger extends Application implements Logger {
     }
 
     /**
-     * Model object for the data displayed in the output table
-     */
-    private static class TableRowData {
-        public TableRowData() {}
-
-        /**
-         * Construct the object explictly initializing its values
-         *
-         * @param methodName The tested method (simple name, without return
-         *                   type nor parameter list)
-         * @param testResult String representing the result, "Success" on test
-         *                   pass, "Fail" otherwise
-         */
-        public TableRowData(String methodName, String testResult) {
-            this.methodName = methodName;
-            this.testResult = testResult;
-        }
-
-        private String methodName = "";
-
-        /**
-         * @return The method's name (simple name, without return type nor
-         *         parameter list)
-         */
-        public String getMethodName() { return methodName; }
-
-        /**
-         * @param methodName The method's name (simple name, without return
-         *                   type nor parameter list)
-         */
-        public void setMethodName(String methodName) {
-            this.methodName = methodName;
-        }
-
-        private String testResult = "";
-
-        /**
-         * @return String representing the result, "Success" on test
-         *         pass, "Fail" otherwise
-         */
-        public String getTestResult() { return testResult; }
-
-        /**
-         * @param testResult String representing the result, "Success" on test
-         *                   pass, "Fail" otherwise
-         */
-        public void setTestResult(String testResult) {
-            this.testResult = testResult;
-        }
-    }
-
-    /**
      * Starts the GuiLogger and test execution. Not to be explicitly
      * called - run has to be used instead
      *
@@ -252,7 +203,7 @@ public class GuiLogger extends Application implements Logger {
                 return new SimpleStringProperty("<no name>");
             }
         });
-        methodsColumn.setPrefWidth(400);
+        methodsColumn.setPrefWidth(350);
         TableColumn<TableRowData, String> resultColumn = new TableColumn<>("Result");
         resultColumn.setCellValueFactory(p -> {
             if (p.getValue() != null) {
@@ -283,8 +234,17 @@ public class GuiLogger extends Application implements Logger {
                     }
                 }
         );
+        TableColumn<TableRowData, String> notesColumn = new TableColumn<>("Notes");
+        notesColumn.setCellValueFactory(p -> {
+            if (p.getValue() != null) {
+                return new SimpleStringProperty(p.getValue().getNotes());
+            } else {
+                return new SimpleStringProperty("");
+            }
+        });
+        notesColumn.setPrefWidth(350);
         resultTable = new TableView<>(tableRows);
-        resultTable.getColumns().setAll(methodsColumn, resultColumn);
+        resultTable.getColumns().setAll(methodsColumn, resultColumn, notesColumn);
         resultTable.getItems().addListener((ListChangeListener<TableRowData>) (c -> {
             c.next();
             scrollTableToBottom();
@@ -302,7 +262,7 @@ public class GuiLogger extends Application implements Logger {
             @Override
             protected void testMethod(Object test, Method method) {
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(0);
                 } catch (InterruptedException e) {}
                 super.testMethod(test, method);
             }
@@ -318,28 +278,36 @@ public class GuiLogger extends Application implements Logger {
      * @throws IllegalStateException when called by an uninitialized GuiLogger
      */
     private void scrollTableToBottom() {
-        if (initialized) {
-            final int size = resultTable.getItems().size();
-            if (size > 1) {
-                Logging.getControlsLogger().setLevel(PlatformLogger.Level.WARNING);
-                resultTable.scrollTo(size - 1);
+        Platform.runLater(()-> {
+            if (isRunning()) {
+                final int size = resultTable.getItems().size();
+                if (size > 1) {
+                    resultTable.scrollTo(size - 1);
+                }
+            } else {
+                throw new IllegalStateException("Cannot scroll in an unitialized GuiLogger GUI");
             }
-        } else {
-            throw new IllegalStateException("Cannot scroll in an unitialized GuiLogger GUI");
-        }
+        });
     }
 
     private void scrollOutputLogToBottom() {
-        textArea.setScrollTop(Double.MAX_VALUE);
+        Platform.runLater(() -> {
+            if (isRunning()) {
+                textArea.setScrollTop(Double.MAX_VALUE);
+            }
+        });
     }
 
     @Override
     public void log(String message) {
-        if (!interrupted) {
-            String logText = textArea.getText();
-            textArea.appendText((logText.equals("") ? "" : "\n") + message);
-            scrollOutputLogToBottom();
-        }
+        Platform.runLater(() -> {
+            if (isRunning()) {
+                String logText = textArea.getText();
+                textArea.appendText((logText.equals("") ? "" : "\n") + message);
+                scrollOutputLogToBottom();
+                externalLogger.log(message);
+            }
+        });
     }
 
     @Override
@@ -366,40 +334,52 @@ public class GuiLogger extends Application implements Logger {
 
     @Override
     public void logTestCaseSuccess() {
-        if (!interrupted) {
-            Platform.runLater(() -> {
-                tableRows.add(new TableRowData("\t" + currentMethodName, "Success"));
-            });
-            currentClassTestCount++;
-            progressBar.setProgress(((double) currentTestCount + currentClassTestCount) / numTests);
-        }
+        putNewResultRow("Success", "");
     }
 
     @Override
     public void logTestCaseFail(Throwable error) {
-        if (!interrupted) {
+        putNewResultRow(
+                "Fail",
+                error.getClass().getSimpleName() + " - " + error.getMessage()
+        );
+    }
+
+    private void putNewResultRow(String result, String notes) {
+        if (isRunning()) {
             Platform.runLater(() -> {
-                tableRows.add(new TableRowData("\t" + currentMethodName, "Fail"));
+                tableRows.add(new TableRowData("\t" + currentMethodName, result, notes));
+                currentClassTestCount++;
+                setProgress(currentTestCount + currentClassTestCount, numTests);
             });
-            currentClassTestCount++;
-            progressBar.setProgress(((double) currentTestCount + currentClassTestCount) / numTests);
         }
     }
 
     @Override
     public void logSkipWholeTest(Class testClass, Throwable throwable) {
-        if (!interrupted) {
-            currentTestCount += currentClassTestCount;
+        if (isRunning()) {
+            currentTestCount += expectedClassTests;
+            expectedClassTests = 0;
             currentClassTestCount = 0;
-            progressBar.setProgress(((double) currentTestCount) / numTests);
+            setProgress(currentTestCount, numTests);
         }
+    }
+
+    /**
+     * Fills the bar up to (current/total) percent
+     *
+     * @param current Processed values
+     * @param total Total values
+     */
+    private void setProgress(int current, int total) {
+        Platform.runLater(() -> progressBar.setProgress(((double) current) / total));
     }
 
     @Override
     public void logTestBegin(Class testClass) {
-        if (!interrupted) {
+        if (isRunning()) {
             Platform.runLater(() -> {
-                tableRows.add(new TableRowData(testClass.getName(), ""));
+                tableRows.add(new TableRowData(testClass.getName(), "", ""));
             });
         }
     }
@@ -418,8 +398,12 @@ public class GuiLogger extends Application implements Logger {
 
     @Override
     public void endLog(boolean interrupted) {
-        if (!GuiLogger.interrupted) {
+        if (isRunning()) {
             scrollOutputLogToBottom();
         }
+    }
+
+    private boolean isRunning() {
+        return initialized && !interrupted;
     }
 }
