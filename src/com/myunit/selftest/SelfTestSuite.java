@@ -1,6 +1,7 @@
 package com.myunit.selftest;
 
 import com.myunit.log.JUnitXMLLogger;
+import com.myunit.log.gui.GuiLogger;
 import com.myunit.test.*;
 
 /**
@@ -12,6 +13,13 @@ import com.myunit.test.*;
  * @see com.myunit.log.Logger
  */
 public class SelfTestSuite {
+    /**
+     * Specifies SelfTestSuite's running mode
+     */
+    enum TestMode {
+        STANDARD,
+        GUI
+    }
 
     /**
      * The main method to execute to start testing
@@ -19,10 +27,7 @@ public class SelfTestSuite {
      * @param args      testing params, currently unused
      */
     public static void main(String[] args){
-        /*new TestRunner(
-                new JUnitXMLLogger("log.xml")
-                        .openLogAfterTests(false)
-        ).run(
+        Class[] testClasses = new Class[] {
                 TestAssertMiscellaneous.class,
                 TestAssertTrueFalse.class,
                 TestAssertEquals.class,
@@ -32,17 +37,18 @@ public class SelfTestSuite {
                 TestAssertGreaterThanOrEquals.class,
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
-        );*/
-        new com.myunit.log.gui.GuiLogger(
-                TestAssertMiscellaneous.class,
-                TestAssertTrueFalse.class,
-                TestAssertEquals.class,
-                TestAssertNotEquals.class,
-                TestAssertGreaterThan.class,
-                TestAssertLessThan.class,
-                TestAssertGreaterThanOrEquals.class,
-                TestAssertLessThanOrEquals.class,
-                TestNullNotNull.class
-        ).run(args);
+        };
+        TestMode testMode = TestMode.GUI;
+        switch (testMode) {
+            case STANDARD:
+                new TestRunner(
+                        new JUnitXMLLogger("log.xml").openLogAfterTests(false)
+                ).run(testClasses);
+                break;
+            case GUI:
+                new GuiLogger(testClasses).run(args);
+                break;
+            default: break;
+        }
     }
 }
