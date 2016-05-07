@@ -141,10 +141,11 @@ public class GuiLogger extends Application implements Logger {
 
     /**
      * Starts the GUI logger and runs the tests
-     *
-     * @note Calling this method modifies Logging.setControlsLogger()'s
-     *       log level from INFO to WARNING to avoid unnecessary INFO level
-     *       logging (refer bug RT-40654)
+     * <p>
+     * Calling this method modifies Logging.setControlsLogger()'s
+     * log level from INFO to WARNING to avoid unnecessary INFO level
+     * logging (refer bug RT-40654)
+     * </p>
      *
      * @param args Command-line application arguments
      */
@@ -160,10 +161,9 @@ public class GuiLogger extends Application implements Logger {
      * called - run has to be used instead
      *
      * @param primaryStage The main window
-     * @throws Exception
      */
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         //Todo: check initialized and called from run
 
         makeOutputTable();
