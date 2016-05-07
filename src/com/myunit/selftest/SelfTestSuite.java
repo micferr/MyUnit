@@ -38,7 +38,7 @@ public class SelfTestSuite {
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
         };
-        TestMode testMode = TestMode.GUI;
+        TestMode testMode = TestMode.STANDARD;
         switch (testMode) {
             case STANDARD:
                 new TestRunner(
