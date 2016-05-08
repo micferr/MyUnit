@@ -3,6 +3,7 @@ package com.myunit.log.gui;
 import com.myunit.log.Logger;
 import com.myunit.log.MultiLogger;
 import com.myunit.test.TestRunner;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -15,12 +16,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 
 /**
  * Displays the test results in a JavaFX GUI.
@@ -142,7 +141,7 @@ public class GuiLogger extends Application implements Logger {
     /**
      * Starts the GUI logger and runs the tests
      * <p>
-     * Calling this method modifies Logging.setControlsLogger()'s
+     * Calling this method modifies "controls" Logger's
      * log level from INFO to WARNING to avoid unnecessary INFO level
      * logging (refer bug RT-40654)
      * </p>
@@ -177,17 +176,35 @@ public class GuiLogger extends Application implements Logger {
         progressBar.setMinHeight(20);
         progressBar.setPrefWidth(800);
 
-        TestRunner testRunner = startTestThread();
+        TestRunner testRunner = startTestThread(); //Todo - startTT -> makeTT, launch after primaryStage.show()
 
         VBox mainLayout = new VBox(resultTable, textArea, progressBar);
         Scene scene = new Scene(mainLayout, 800, 600);
         primaryStage.setScene(scene);
+        primaryStage.widthProperty().addListener( (observable, oldValue, newValue) -> {
+            if (isRunning()) {
+                progressBar.setPrefWidth(newValue.doubleValue());
+            }
+        });
+        primaryStage.heightProperty().addListener( (observable, oldValue, newValue) -> {
+            if (isRunning()) {
+                resultTable.setPrefHeight(
+                        newValue.doubleValue() -
+                        textArea.getHeight() -
+                        progressBar.getHeight()
+                );
+            }
+        });
         primaryStage.setOnCloseRequest(event -> {
             testThread.interrupt();
             testRunner.interrupt();
             interrupted = true;
         });
         primaryStage.show();
+        java.util.logging.Logger l = java.util.logging.LogManager.getLogManager().getLogger("controls");
+        if (l!=null) {
+            l.setLevel(Level.WARNING);
+        }
     }
 
     /**
@@ -262,7 +279,7 @@ public class GuiLogger extends Application implements Logger {
             @Override
             protected void testMethod(Object test, Method method) {
                 try {
-                    Thread.sleep(0);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {}
                 super.testMethod(test, method);
             }
@@ -284,8 +301,6 @@ public class GuiLogger extends Application implements Logger {
                 if (size > 1) {
                     resultTable.scrollTo(size - 1);
                 }
-            } else {
-                throw new IllegalStateException("Cannot scroll in an unitialized GuiLogger GUI");
             }
         });
     }

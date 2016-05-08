@@ -16,7 +16,7 @@ public class SelfTestSuite {
     /**
      * Specifies SelfTestSuite's running mode
      */
-    enum TestMode {
+    private enum TestMode {
         STANDARD,
         GUI
     }
