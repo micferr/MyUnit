@@ -3,8 +3,6 @@ package com.myunit.log.gui;
 import com.myunit.log.Logger;
 import com.myunit.log.MultiLogger;
 import com.myunit.test.TestRunner;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
-import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -61,8 +59,11 @@ public class GuiLogger extends Application implements Logger {
     private TableView<TableRowData> resultTable;
     private TextArea textArea;
     private ProgressBar progressBar;
-    private Transition progressBarTransition;
+    private Stage primaryStage;
     private Thread testThread;
+
+    private static volatile boolean timeoutClose = false;
+    private static volatile long timeoutCloseMillis = 0;
 
     public GuiLogger() {
         this(null, (Class[])null);
@@ -139,6 +140,22 @@ public class GuiLogger extends Application implements Logger {
     }
 
     /**
+     * Make the window close after specified timeout
+     *
+     * @param millis Number of milliseconds to wait. Time is considered to start
+     *               after all test have finished.
+     */
+    public void setAutocloseTimeout(long millis) {
+        if (millis > 0) {
+            timeoutClose = true;
+            timeoutCloseMillis = millis;
+        } else {
+            timeoutClose = false;
+            timeoutCloseMillis = 0;
+        }
+    }
+
+    /**
      * Starts the GUI logger and runs the tests
      * <p>
      * Calling this method modifies "controls" Logger's
@@ -200,7 +217,12 @@ public class GuiLogger extends Application implements Logger {
             testRunner.interrupt();
             interrupted = true;
         });
+        this.primaryStage = primaryStage;
         primaryStage.show();
+
+        /**
+         * No "controls" Logger exists before call to Stage.show()
+         */
         java.util.logging.Logger l = java.util.logging.LogManager.getLogManager().getLogger("controls");
         if (l!=null) {
             l.setLevel(Level.WARNING);
@@ -279,7 +301,7 @@ public class GuiLogger extends Application implements Logger {
             @Override
             protected void testMethod(Object test, Method method) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(0);
                 } catch (InterruptedException e) {}
                 super.testMethod(test, method);
             }
@@ -292,7 +314,7 @@ public class GuiLogger extends Application implements Logger {
     }
 
     /**
-     * @throws IllegalStateException when called by an uninitialized GuiLogger
+     * Scrolls the result table to the bottom
      */
     private void scrollTableToBottom() {
         Platform.runLater(()-> {
@@ -387,7 +409,11 @@ public class GuiLogger extends Application implements Logger {
      * @param total Total values
      */
     private void setProgress(int current, int total) {
-        Platform.runLater(() -> progressBar.setProgress(((double) current) / total));
+        Platform.runLater(() -> {
+            if (isRunning()) {
+                progressBar.setProgress(((double) current) / total);
+            }
+        });
     }
 
     @Override
@@ -415,6 +441,26 @@ public class GuiLogger extends Application implements Logger {
     public void endLog(boolean interrupted) {
         if (isRunning()) {
             scrollOutputLogToBottom();
+            startAutocloseThread();
+        }
+    }
+
+    /**
+     * <p>If auto-closing on timeout has been enabled, launches
+     * the thread performing it.</p>
+     * <p>The thread is a Daemon Thread so that it doesn't stop
+     * program termination when the GUI is manually closed.</p>
+     */
+    private void startAutocloseThread() {
+        if (timeoutClose) {
+            Thread t = new Thread(() -> {
+                try {
+                    Thread.sleep(timeoutCloseMillis);
+                } catch (InterruptedException e) {}
+                Platform.runLater(() -> primaryStage.close());
+            });
+            t.setDaemon(true);
+            t.start();
         }
     }
 

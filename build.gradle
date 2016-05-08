@@ -13,6 +13,7 @@ compileJavaClasses {
 runSelfTestSuite {
   classpath sourceSets.main.runtimeClasspath
   main = "com.myunit.selftest.SelfTestSuite"
+  args '100'
 }
 tasks.runSelfTestSuite.dependsOn(compileJavaClasses)
 

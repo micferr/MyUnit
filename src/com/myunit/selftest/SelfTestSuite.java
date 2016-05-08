@@ -38,7 +38,7 @@ public class SelfTestSuite {
                 TestAssertLessThanOrEquals.class,
                 TestNullNotNull.class
         };
-        TestMode testMode = TestMode.STANDARD;
+        TestMode testMode = TestMode.GUI;
         switch (testMode) {
             case STANDARD:
                 new TestRunner(
@@ -46,7 +46,9 @@ public class SelfTestSuite {
                 ).run(testClasses);
                 break;
             case GUI:
-                new GuiLogger(testClasses).run(args);
+                GuiLogger guiLogger = new GuiLogger(testClasses);
+                guiLogger.setAutocloseTimeout(args.length > 0 ? Long.parseLong(args[0]) : 0);
+                guiLogger.run(args);
                 break;
             default: break;
         }
