@@ -25,7 +25,9 @@ public class SelfTestSuite {
     /**
      * The main method to execute to start testing
      *
-     * @param args      testing params, currently unused
+     * @param args args[0] - Optional parameter, number of milliseconds
+     *             to wait for the GUI to close after all the tests have
+     *             finished.
      */
     public static void main(String[] args){
         Class[] testClasses = new Class[] {
