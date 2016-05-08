@@ -1,6 +1,7 @@
 package com.myunit.selftest;
 
 import com.myunit.log.JUnitXMLLogger;
+import com.myunit.log.Logger;
 import com.myunit.log.gui.GuiLogger;
 import com.myunit.test.*;
 
@@ -39,14 +40,14 @@ public class SelfTestSuite {
                 TestNullNotNull.class
         };
         TestMode testMode = TestMode.GUI;
+        Logger junitLogger = new JUnitXMLLogger("log.xml").openLogAfterTests(false);
         switch (testMode) {
             case STANDARD:
-                new TestRunner(
-                        new JUnitXMLLogger("log.xml").openLogAfterTests(false)
-                ).run(testClasses);
+                new TestRunner(junitLogger).run(testClasses);
                 break;
             case GUI:
                 GuiLogger guiLogger = new GuiLogger(testClasses);
+                guiLogger.setLoggers(junitLogger);
                 guiLogger.setAutocloseTimeout(args.length > 0 ? Long.parseLong(args[0]) : 0);
                 guiLogger.run(args);
                 break;
