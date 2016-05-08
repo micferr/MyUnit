@@ -342,24 +342,26 @@ public class GuiLogger extends Application implements Logger {
                 String logText = textArea.getText();
                 textArea.appendText((logText.equals("") ? "" : "\n") + message);
                 scrollOutputLogToBottom();
-                externalLogger.log(message);
             }
         });
+        externalLogger.log(message);
     }
 
     @Override
     public void logClassNumTests(int numTests) {
         this.expectedClassTests = numTests;
+        externalLogger.logClassNumTests(numTests);
     }
 
     @Override
     public void logTotalNumTests(int numTests) {
         this.numTests = numTests;
+        externalLogger.logTotalNumTests(numTests);
     }
 
     @Override
     public void logExceptionRaised(Class testClass, Method method, Throwable errorCause) {
-
+        externalLogger.logExceptionRaised(testClass, method, errorCause);
     }
 
     String currentMethodName;
@@ -367,11 +369,13 @@ public class GuiLogger extends Application implements Logger {
     public void logExecutingMethod(Method method) {
         currentMethodName = method.getName();
         log("Executing " + currentMethodName);
+        externalLogger.logExecutingMethod(method);
     }
 
     @Override
     public void logTestCaseSuccess() {
         putNewResultRow("Success", "");
+        externalLogger.logTestCaseSuccess();
     }
 
     @Override
@@ -380,6 +384,7 @@ public class GuiLogger extends Application implements Logger {
                 "Fail",
                 error.getClass().getSimpleName() + " - " + error.getMessage()
         );
+        externalLogger.logTestCaseFail(error);
     }
 
     private void putNewResultRow(String result, String notes) {
@@ -400,6 +405,7 @@ public class GuiLogger extends Application implements Logger {
             currentClassTestCount = 0;
             setProgress(currentTestCount, numTests);
         }
+        externalLogger.logSkipWholeTest(testClass, throwable);
     }
 
     /**
@@ -423,10 +429,12 @@ public class GuiLogger extends Application implements Logger {
                 tableRows.add(new TableRowData(testClass.getName(), "", ""));
             });
         }
+        externalLogger.logTestBegin(testClass);
     }
 
     @Override
     public void logTestEnd() {
+        externalLogger.logTestEnd();
     }
 
     @Override
@@ -435,6 +443,7 @@ public class GuiLogger extends Application implements Logger {
                 "\nPassed: " + passedTests +
                 "\nFailed: " + failedTests +
                 "\nTotal: " + (passedTests+failedTests));
+        externalLogger.logSuiteResults(passedTests, failedTests);
     }
 
     @Override
@@ -443,6 +452,7 @@ public class GuiLogger extends Application implements Logger {
             scrollOutputLogToBottom();
             startAutocloseThread();
         }
+        externalLogger.endLog(interrupted);
     }
 
     /**

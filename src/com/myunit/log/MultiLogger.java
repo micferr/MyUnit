@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-public class MultiLogger extends LoggerAdapter {
+public class MultiLogger implements Logger {
     private List<Logger> loggers;
 
     public MultiLogger(Logger... loggers) {
@@ -23,6 +23,16 @@ public class MultiLogger extends LoggerAdapter {
     @Override
     public void log(String message) {
         loggers.forEach(logger -> logger.log(message));
+    }
+
+    @Override
+    public void logClassNumTests(int numTests) {
+        loggers.forEach(logger -> logger.logClassNumTests(numTests));
+    }
+
+    @Override
+    public void logTotalNumTests(int numTests) {
+        loggers.forEach(logger -> logger.logTotalNumTests(numTests));
     }
 
     @Override
@@ -62,6 +72,11 @@ public class MultiLogger extends LoggerAdapter {
 
     @Override
     public void logSuiteResults(int passedTests, int failedTests) {
-        loggers.forEach(logger -> logSuiteResults(passedTests, failedTests));
+        loggers.forEach(logger -> logger.logSuiteResults(passedTests, failedTests));
+    }
+
+    @Override
+    public void endLog(boolean interrupted) {
+        loggers.forEach(logger -> logger.endLog(interrupted));
     }
 }
