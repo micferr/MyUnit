@@ -10,6 +10,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class responsible for running the test classes and logging test info.
+ */
 public class TestRunner {
     private Logger out;
     private int failedTests;
@@ -17,10 +20,20 @@ public class TestRunner {
     private boolean runOptionalTests;
     private boolean interrupted;
 
+    /**
+     * Builds a TestRunner which outputs logging information on
+     * System.out.
+     */
     public TestRunner() {
         this(new StreamLogger(System.out));
     }
 
+    /**
+     * Builds a TestRunner which uses the {@code logger} parameter for
+     * logging test information.
+     *
+     * @param logger The bound logger
+     */
     public TestRunner(Logger logger) {
         out = logger;
         failedTests = 0;
@@ -29,23 +42,46 @@ public class TestRunner {
         interrupted = false;
     }
 
+    /**
+     * @return The bound Logger
+     */
     public Logger getLogger() {
         return out;
     }
 
-    public void setLogger(Logger stream) {
-        out = stream;
+    /**
+     * @param logger The Logger to bind
+     */
+    public void setLogger(Logger logger) {
+        out = logger;
     }
 
+    /**
+     * @param runOptTests Whether optional tests have to be executed
+     * @return this
+     *
+     * @see Test#optional()
+     */
     public TestRunner runOptionalTests(boolean runOptTests) {
         this.runOptionalTests = runOptTests;
         return this;
     }
 
+    /**
+     * <p>Interrupts testing.</p>
+     * <p>Testing is interrupted after the current test method has
+     * finished. Using {@link Thread#interrupt()} is not recommended
+     * as it could interfere with the test methods.</p>
+     */
     public void interrupt() {
         this.interrupted = true;
     }
 
+    /**
+     * Run the tests.
+     *
+     * @param testClasses The classes with the test methods
+     */
     public void run(Class... testClasses) {
         if (testClasses != null) {
             out.logTotalNumTests(countTotalTests(testClasses));
@@ -75,6 +111,10 @@ public class TestRunner {
         }
     }
 
+    /**
+     * @param testClasses The classes whose test methods are to be counted
+     * @return The number of test methods
+     */
     private int countTotalTests(Class... testClasses) {
         int count = 0;
         for (Class c : testClasses) {
@@ -83,6 +123,10 @@ public class TestRunner {
         return count;
     }
 
+    /**
+     * @param c The class whose test methods are to be counted
+     * @return The number of test methods
+     */
     private int countClassTests(Class c) {
         int count = 0;
         for (Method m : c.getDeclaredMethods()) {
@@ -93,18 +137,43 @@ public class TestRunner {
         return count;
     }
 
+    /**
+     * Builds an object of type {@code testClass} using its default
+     * constructor (assuming the class has it) and returns it.
+     *
+     * @param testClass The Class to build
+     * @return The built object
+     * @throws Throwable Thrown from any error source both from retrieving
+     *                   the constructor (e.g. building a class with no
+     *                   default constructor) or from running the constructor
+     *                   itself (e.g. exceptions thrown in the constructor's
+     *                   body)
+     */
     private Object buildTest(Class<?> testClass) throws Throwable {
         out.log("Building " + testClass.getSimpleName() + "...");
         return testClass.getConstructor().newInstance();
     }
 
+    /**
+     * Sets up {@code test} by running the methods annotated with the
+     * {@link Before} annotation.
+     *
+     * @param test The test object
+     * @throws Throwable Thrown from any error source both from retrieving
+     *                   the methods or from running them.
+     */
     private void setUp(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Setting up " + testClass.getSimpleName() + "...");
         executeAnnotatedMethods(test, Before.class);
     }
 
-    protected void executeTests(Object test) {
+    /**
+     * Executes the test methods by calling them on {@code test}.
+     *
+     * @param test The test Object containing the test methods
+     */
+    private void executeTests(Object test) {
         Class testClass = test.getClass();
         out.log("Testing " + testClass.getSimpleName() + "...");
         getSortedTests(testClass).forEach((method) -> {
@@ -114,6 +183,10 @@ public class TestRunner {
         });
     }
 
+    /**
+     * @param testClass The class whose methods are to be retrieved
+     * @return The sorted list of retrieved test methods
+     */
     private List<Method> getSortedTests(Class testClass) {
         Method[] methods = testClass.getDeclaredMethods();
         List<Method> tests = new ArrayList<>();
@@ -142,6 +215,16 @@ public class TestRunner {
         return tests;
     }
 
+    /**
+     * <p>Runs the test methods and logs the result.</p>
+     * <p>It is currently marked as protected so that it can be
+     * overridden in GuiLogger with the addition of a
+     * {@link Thread#sleep(long)} instruction in order to
+     * willingly slow down GUI updates.</p>
+     *
+     * @param test The test object, caller of the test method
+     * @param method The test method to call
+     */
     protected void testMethod(Object test, Method method) {
         out.logExecutingMethod(method);
         executedTests++;
@@ -168,25 +251,56 @@ public class TestRunner {
         }
     }
 
+    /**
+     * @param method The test method to be inspected (is assumed non-null)
+     * @return Whether the test expects an exception.
+     */
     private boolean expectsExceptions(Method method) {
         return method.getDeclaredAnnotation(Test.class).expected() != Test.None.class;
     }
 
+    /**
+     * @param exception The exception thrown from a {@code method}
+     * @param method The executed test method
+     * @return Whether the thrown exception is the expected ne
+     */
     private boolean isExpectedException(Exception exception, Method method) {
         return exception.getCause().getClass().equals(method.getDeclaredAnnotation(Test.class).expected());
     }
 
+    /**
+     * Logs the test failure with the bound {@link Logger}.
+     *
+     * @param throwable The test failure cause
+     */
     private void onFailedTest(Throwable throwable) {
         failedTests++;
         out.logTestCaseFail(throwable);
     }
 
+    /**
+     * Executes tear-down methods (e.g. stream closing) marked
+     * with {@link After}.
+     *
+     * @param test The test object
+     * @throws Throwable Thrown from any error source both from retrieving
+     *                   the methods or from running them.
+     */
     private void tearDown(Object test) throws Throwable {
         Class testClass = test.getClass();
         out.log("Tearing down " + testClass.getSimpleName() + "...");
         executeAnnotatedMethods(test, After.class);
     }
 
+    /**
+     * Executes all the methods of {@code test} annotated with the
+     * {@code annotationClass} annotation.
+     *
+     * @param test The test object
+     * @param annotationClass The selector annotation
+     * @throws Throwable Thrown from any error source both from retrieving
+     *                   the methods or from running them.
+     */
     private void executeAnnotatedMethods(Object test, Class<? extends Annotation> annotationClass) throws Throwable {
         for (Method method : test.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(annotationClass)) {
