@@ -1,5 +1,7 @@
 package com.myunit.log.gui;
 
+import com.myunit.log.HTMLLogger;
+import com.myunit.log.JUnitXMLLogger;
 import com.myunit.log.Logger;
 import com.myunit.log.MultiLogger;
 import com.myunit.test.TestRunner;
@@ -15,6 +17,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,6 +33,7 @@ import java.util.logging.Level;
  */
 public class GuiLogger extends Application implements Logger {
     private static MultiLogger externalLogger = null;
+    private static ReplayLogger logReplayer = null;
     private static Class[] testClasses = new Class[]{};
     private static volatile boolean initialized = false;
     /**
@@ -84,17 +89,21 @@ public class GuiLogger extends Application implements Logger {
     /**
      * @param loggers Loggers receiving the task of logging the test
      *                suite execution
-     * @param testClasses The classes with the @Test-annotated methods to be tested
+     * @param classes The classes with the @Test-annotated methods to be tested
      */
     private GuiLogger(
             List<Logger> loggers,
-            Class... testClasses
+            Class... classes
     ) {
         if (!initialized) {
-            this.externalLogger = loggers != null ?
-                    new MultiLogger(loggers) :
-                    new MultiLogger();
-            this.testClasses = testClasses != null ? testClasses : new Class[]{};
+            logReplayer = new ReplayLogger();
+            List<Logger> allLoggers = new ArrayList<>();
+            if (loggers != null) {
+                allLoggers.addAll(loggers);
+            }
+            allLoggers.add(logReplayer);
+            externalLogger = new MultiLogger(allLoggers);
+            testClasses = classes != null ? classes : new Class[]{};
             initialized = true;
             interrupted = false;
             numTests = 0;
@@ -132,7 +141,9 @@ public class GuiLogger extends Application implements Logger {
                 for (Logger l : loggers) {
                     Objects.requireNonNull(l);
                 }
-                externalLogger = new MultiLogger(loggers);
+                List<Logger> allLoggers = new ArrayList<>(Arrays.asList(loggers));
+                allLoggers.add(logReplayer);
+                externalLogger = new MultiLogger(allLoggers);
                 return this;
             } catch (NullPointerException e) {
                 throw new NullPointerException("Null logger set to a GuiLogger");
@@ -185,9 +196,25 @@ public class GuiLogger extends Application implements Logger {
     public void start(Stage primaryStage) {
         //Todo: check initialized and called from run
 
+        Menu fileMenu = new Menu("File");
+        Menu exportMenu = new Menu("Export results");
+        MenuItem exportJUnit = new MenuItem("As JUnit XML");
+        //todo custom file names
+        //todo wait log end for activation
+        exportJUnit.setOnAction(e ->
+            logReplayer.replay(new JUnitXMLLogger("log.xml").openLogAfterTests(false))
+        );
+        MenuItem exportHTML = new MenuItem("As HTML page");
+        exportHTML.setOnAction(e ->
+            logReplayer.replay(new HTMLLogger("log.html").openLogAfterTests(false))
+        );
+        exportMenu.getItems().addAll(exportJUnit, exportHTML);
+        fileMenu.getItems().add(exportMenu);
+        MenuBar menuBar = new MenuBar(fileMenu);
+
         makeOutputTable();
 
-        TabPane classTabs = new TabPane();
+        TabPane classTabs = new TabPane(); //todo add support for splitting the suite view in tabs (one for each test class)
 
         textArea = new TextArea();
         textArea.setEditable(false);
@@ -198,7 +225,7 @@ public class GuiLogger extends Application implements Logger {
 
         TestRunner testRunner = startTestThread(); //Todo - startTT -> makeTT, launch after primaryStage.show()
 
-        VBox mainLayout = new VBox(resultTable, textArea, progressBar);
+        VBox mainLayout = new VBox(menuBar, resultTable, textArea, progressBar);
         Scene scene = new Scene(mainLayout, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.widthProperty().addListener( (observable, oldValue, newValue) -> {
