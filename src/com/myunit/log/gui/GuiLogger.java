@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
 /**
@@ -64,6 +65,8 @@ public class GuiLogger extends Application implements Logger {
 
     private static volatile boolean timeoutClose = false;
     private static volatile long timeoutCloseMillis = 0;
+
+    private ConcurrentLinkedQueue<String> methodNamesQueue = new ConcurrentLinkedQueue<>();
 
     public GuiLogger() {
         this(null, (Class[])null);
@@ -207,8 +210,8 @@ public class GuiLogger extends Application implements Logger {
             if (isRunning()) {
                 resultTable.setPrefHeight(
                         newValue.doubleValue() -
-                        textArea.getHeight() -
-                        progressBar.getHeight()
+                                textArea.getHeight() -
+                                progressBar.getHeight()
                 );
             }
         });
@@ -364,10 +367,11 @@ public class GuiLogger extends Application implements Logger {
         externalLogger.logExceptionRaised(testClass, method, errorCause);
     }
 
-    String currentMethodName;
+    String currentMethodName; //Todo - Use concurrent queue
     @Override
     public void logExecutingMethod(Method method) {
         currentMethodName = method.getName();
+        methodNamesQueue.add(method.getName());
         log("Executing " + currentMethodName);
         externalLogger.logExecutingMethod(method);
     }
@@ -385,12 +389,17 @@ public class GuiLogger extends Application implements Logger {
                 error.getClass().getSimpleName() + " - " + error.getMessage()
         );
         externalLogger.logTestCaseFail(error);
+        log("Test failed with exception of type " + error.getClass().getSimpleName() + " thrown at:");
+        for (StackTraceElement ste : error.getStackTrace()) {
+            log("\t"+ste.toString());
+        }
     }
 
     private void putNewResultRow(String result, String notes) {
         if (isRunning()) {
             Platform.runLater(() -> {
-                tableRows.add(new TableRowData("\t" + currentMethodName, result, notes));
+                //tableRows.add(new TableRowData("\t" + new String(currentMethodName), result, notes));
+                tableRows.add(new TableRowData("\t" + methodNamesQueue.remove(), result, notes));
                 currentClassTestCount++;
                 setProgress(currentTestCount + currentClassTestCount, numTests);
             });
