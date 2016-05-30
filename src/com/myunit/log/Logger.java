@@ -92,9 +92,9 @@ public interface Logger {
     void logTestBegin(Class testClass);
 
     /**
-     * Logs the end of a test class's execution.<br />
-     * The test class is the same passed to the last {@code logTestBegin}
-     * invocation.
+     * <p>Logs the end of a test class's execution.</p>
+     * <p>The test class is the same passed to the last {@code logTestBegin}
+     * invocation.</p>
      */
     void logTestEnd();
 
