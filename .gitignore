@@ -1,0 +1,12 @@
+.gradle/**
+.idea/**
+build/**
+docs/**
+out/**
+build.gradle
+log.html
+log.xml
+log2.html
+UnitTesting.iml
+UnitTesting.ipr
+UnitTesting.iws
