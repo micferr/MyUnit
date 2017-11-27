@@ -1,9 +1,6 @@
 package com.myunit.log.gui;
 
-import com.myunit.log.HTMLLogger;
-import com.myunit.log.JUnitXMLLogger;
-import com.myunit.log.Logger;
-import com.myunit.log.MultiLogger;
+import com.myunit.log.*;
 import com.myunit.test.TestRunner;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -14,8 +11,10 @@ import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -204,10 +203,13 @@ public class GuiLogger extends Application implements Logger {
         exportJUnit.setOnAction(e ->
             logReplayer.replay(new JUnitXMLLogger("log.xml").openLogAfterTests(false))
         );
+        //exportJUnit.setDisable(true);
         MenuItem exportHTML = new MenuItem("As HTML page");
-        exportHTML.setOnAction(e ->
-            logReplayer.replay(new HTMLLogger("log.html").openLogAfterTests(false))
-        );
+        exportHTML.setOnAction(e -> {
+            String absPath = getSaveFileLocation();
+            if (absPath != null) logReplayer.replay((new HTMLLogger(absPath).openLogAfterTests(false)));
+        });
+        //exportHTML.setDisable(true);
         exportMenu.getItems().addAll(exportJUnit, exportHTML);
         fileMenu.getItems().add(exportMenu);
         MenuBar menuBar = new MenuBar(fileMenu);
@@ -257,6 +259,19 @@ public class GuiLogger extends Application implements Logger {
         if (l!=null) {
             l.setLevel(Level.WARNING);
         }
+    }
+
+    /**
+     * Displays a Save File window and return the path to the choosen file.
+     *
+     * @return The absolute path to the file to save, or null, if the operation
+     *         is cancelled.
+     */
+    private String getSaveFileLocation() {
+        FileChooser fc = new FileChooser();
+        fc.setInitialDirectory(new File(System.getProperty("user.dir")));
+        File f = fc.showSaveDialog(primaryStage);
+        return f != null ? f.getAbsolutePath() : null;
     }
 
     /**
