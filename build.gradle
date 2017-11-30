@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 task compileJavaClasses (type: JavaCompile)
-task runSelfTestSuite (type: JavaExec)
+task runTestSuite (type: JavaExec)
 task generateJavadocs (type: Javadoc)
 
 compileJavaClasses {
@@ -10,7 +10,7 @@ compileJavaClasses {
  classpath = files('build/classes/main')
 }
 
-runSelfTestSuite {
+runTestSuite {
   classpath sourceSets.main.runtimeClasspath
   main = "com.myunit.selftest.SelfTestSuite"
   args '1'
